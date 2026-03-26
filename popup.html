@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>AutoFB</title>
+  <style>
+    :root {
+      --bg: #1a1b1e; --bg2: #25262b; --border: #2c2d32;
+      --text: #c9cdd3; --text2: #9ca3af; --text3: #72757e;
+      --accent: #6366f1; --green: #10b981; --red: #ef4444;
+    }
+    body.light {
+      --bg: #f5f5f7; --bg2: #fff; --border: #e5e5e5;
+      --text: #37383d; --text2: #6b7280; --text3: #9ca3af;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 300px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 13px; }
+
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--bg2); border-bottom: 1px solid var(--border); }
+    .logo { font-size: 16px; font-weight: 700; color: var(--accent); }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+    .dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .status-text { font-size: 11px; color: var(--text3); }
+
+    .body { padding: 12px 14px; }
+
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+
+    .row { display: flex; justify-content: space-between; align-items: center; }
+    .label { font-size: 12px; color: var(--text2); }
+    .value { font-size: 12px; font-weight: 600; color: var(--text); }
+
+    select {
+      padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--bg); color: var(--text); font-size: 12px; outline: none;
+      max-width: 170px; cursor: pointer;
+    }
+
+    .stats { display: flex; gap: 4px; margin-top: 10px; }
+    .stat { flex: 1; text-align: center; background: var(--bg); border-radius: 6px; padding: 6px 2px; }
+    .stat-num { font-size: 15px; font-weight: 700; color: var(--accent); }
+    .stat-lbl { font-size: 9px; color: var(--text3); margin-top: 2px; }
+
+    .timer { font-family: 'SF Mono', 'Consolas', monospace; font-size: 14px; font-weight: 600; color: var(--green); }
+
+    .btn {
+      width: 100%; padding: 10px; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: .15s;
+      margin-top: 4px;
+    }
+    .btn-run { background: var(--accent); color: #fff; }
+    .btn-run:hover { opacity: .9; }
+    .btn-run.stop { background: transparent; color: var(--red); border: 1px solid var(--red); }
+    .btn-run.stop:hover { background: rgba(239,68,68,.1); }
+
+    .btn-dash { background: transparent; color: var(--accent); border: 1px solid var(--border); margin-top: 8px; }
+    .btn-dash:hover { background: var(--bg2); border-color: var(--accent); }
+
+    .footer { text-align: center; padding: 8px; font-size: 10px; color: var(--text3); }
+    .footer a { color: var(--accent); text-decoration: none; }
+
+    .theme-btn { background: none; border: none; cursor: pointer; color: var(--text3); padding: 2px; }
+    .theme-btn svg { width: 16px; height: 16px; }
+
+    /* Auth */
+    .auth-screen { padding: 30px 20px; text-align: center; }
+    .auth-screen h2 { color: var(--accent); margin-bottom: 4px; font-size: 18px; }
+    .auth-screen p { color: var(--text3); font-size: 11px; margin-bottom: 20px; }
+    .auth-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 13px; margin-bottom: 10px; outline: none; }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-error { color: var(--red); font-size: 11px; margin-bottom: 8px; display: none; }
+    .auth-switch { color: var(--text3); font-size: 11px; margin-top: 12px; }
+    .auth-switch a { color: var(--accent); cursor: pointer; text-decoration: none; }
+
+    /* Plan badge */
+    .plan-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+    .plan-badge.free { background: #2a2a3a; color: #9ca3af; }
+    .plan-badge.pro { background: #1a2e1a; color: #10b981; }
+
+    .user-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--bg2); border-bottom: 1px solid var(--border); font-size: 11px; }
+    .user-email { color: var(--text2); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-logout { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 11px; }
+    .btn-logout:hover { color: var(--red); }
+
+    .limit-warn { font-size: 10px; color: var(--text3); text-align: center; margin-top: 6px; }
+    .limit-warn b { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="logo">AutoFB</span>
+    <div class="header-right">
+      <button class="theme-btn" id="themeToggle" title="Chuyển theme">
+        <svg class="icon-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.3 3.3l1.4 1.4M11.3 11.3l1.4 1.4M3.3 12.7l1.4-1.4M11.3 4.7l1.4-1.4"/></svg>
+        <svg class="icon-moon" style="display:none" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 8.5a5.5 5.5 0 0 1-6-6 5.5 5.5 0 1 0 6 6z"/></svg>
+      </button>
+      <span class="dot" id="dot"></span>
+      <span class="status-text" id="statusText">Sẵn sàng</span>
+    </div>
+  </div>
+
+  <!-- AUTH SCREEN (hidden when logged in) -->
+  <div id="authScreen" class="auth-screen" style="display:none">
+    <h2>AutoFB</h2>
+    <p>Đăng nhập để sử dụng</p>
+    <div id="authError" class="auth-error"></div>
+    <input class="auth-input" id="authEmail" type="email" placeholder="Email">
+    <input class="auth-input" id="authPass" type="password" placeholder="Mật khẩu">
+    <button class="btn btn-run" id="btnAuth" style="margin-top:4px">Đăng nhập</button>
+    <div class="auth-switch">
+      <span id="authSwitchText">Chưa có tài khoản?</span>
+      <a id="authSwitchLink">Đăng ký</a>
+    </div>
+  </div>
+
+  <!-- USER BAR (shown when logged in) -->
+  <div id="userBar" class="user-bar" style="display:none">
+    <div><span class="user-email" id="userEmail"></span> <span class="plan-badge" id="planBadge">FREE</span></div>
+    <button class="btn-logout" id="btnLogout">Đăng xuất</button>
+  </div>
+
+  <div class="body" id="mainBody" style="display:none">
+    <!-- Quick Run -->
+    <div class="card">
+      <div class="row" style="margin-bottom: 8px;">
+        <span class="label">Kịch bản</span>
+        <select id="scenarioSelect"></select>
+      </div>
+      <div class="row" style="margin-bottom: 8px;">
+        <span class="label">Hẹn giờ tắt</span>
+        <select id="autoStopSelect">
+          <option value="0">Không giới hạn</option>
+          <option value="5">5 phút</option>
+          <option value="10">10 phút</option>
+          <option value="15">15 phút</option>
+          <option value="30">30 phút</option>
+          <option value="60">1 giờ</option>
+          <option value="120">2 giờ</option>
+        </select>
+      </div>
+      <div class="row" id="timerRow" style="display:none; margin-bottom: 8px;">
+        <span class="label">Thời gian chạy</span>
+        <span class="timer" id="runTimer">00:00</span>
+      </div>
+      <button class="btn btn-run" id="btnRun">Bắt đầu</button>
+    </div>
+
+    <!-- Free limit warning -->
+    <div id="limitWarn" class="limit-warn" style="display:none">
+      Bản Free: <b id="limitText">5 like/ngày</b> — <a href="#" id="upgradeLink" style="color:var(--accent);font-size:10px">Nâng cấp Pro</a>
+    </div>
+
+    <!-- Stats -->
+    <div class="card">
+      <div class="label" style="margin-bottom: 6px;">Phiên hiện tại</div>
+      <div class="stats">
+        <div class="stat"><div class="stat-num" id="sLike">0</div><div class="stat-lbl">Like</div></div>
+        <div class="stat"><div class="stat-num" id="sCmt">0</div><div class="stat-lbl">Cmt</div></div>
+        <div class="stat"><div class="stat-num" id="sFriend">0</div><div class="stat-lbl">Bạn bè</div></div>
+        <div class="stat"><div class="stat-num" id="sStory">0</div><div class="stat-lbl">Story</div></div>
+        <div class="stat"><div class="stat-num" id="sGroup">0</div><div class="stat-lbl">Nhóm</div></div>
+      </div>
+    </div>
+
+    <!-- Dashboard button -->
+    <button class="btn btn-dash" id="btnDash">
+      <svg style="width:14px;height:14px;vertical-align:middle;margin-right:4px" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="5" height="5" rx="1"/><rect x="9.5" y="1.5" width="5" height="5" rx="1"/><rect x="1.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg>
+      Mở bảng điều khiển
+    </button>
+  </div>
+
+  <div class="footer"><a href="https://trancongthang.vn" target="_blank">trancongthang.vn</a></div>
+  <script src="popup.js"></script>
+</body>
+</html>

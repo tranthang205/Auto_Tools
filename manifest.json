@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "AutoFB - Facebook Engagement Tool",
+  "version": "3.1.0",
+  "description": "Smart Facebook engagement assistant. Manage interactions, schedule tasks & boost productivity.",
+  "permissions": ["storage", "scripting", "alarms"],
+  "host_permissions": ["https://www.facebook.com/*", "https://web.facebook.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.facebook.com/*", "https://web.facebook.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

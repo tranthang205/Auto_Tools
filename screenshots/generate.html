@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f0f0f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .slide { width: 1280px; height: 800px; display: none; position: relative; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  /* Slide 1: Hero */
+  .s1 { background: linear-gradient(135deg, #1a1b2e 0%, #2d1b4e 50%, #1a1b2e 100%); align-items: center; justify-content: center; flex-direction: column; }
+  .s1 .logo { font-size: 72px; font-weight: 800; color: #fff; letter-spacing: -2px; }
+  .s1 .logo span { color: #6366f1; }
+  .s1 .tagline { font-size: 28px; color: #9ca3af; margin-top: 16px; font-weight: 400; }
+  .s1 .features { display: flex; gap: 32px; margin-top: 48px; }
+  .s1 .feat { text-align: center; padding: 24px 32px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); border-radius: 16px; }
+  .s1 .feat-icon { font-size: 36px; margin-bottom: 8px; }
+  .s1 .feat-text { font-size: 16px; color: #c9cdd3; font-weight: 500; }
+
+  /* Slide 2: Popup */
+  .s2 { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); align-items: center; justify-content: center; gap: 60px; }
+  .s2 .mockup { width: 300px; background: #1a1b1e; border-radius: 12px; border: 1px solid #2c2d32; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+  .s2 .m-header { padding: 12px 14px; background: #25262b; border-bottom: 1px solid #2c2d32; display: flex; justify-content: space-between; align-items: center; }
+  .s2 .m-logo { font-size: 16px; font-weight: 700; color: #6366f1; }
+  .s2 .m-status { font-size: 11px; color: #10b981; display: flex; align-items: center; gap: 6px; }
+  .s2 .m-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981; }
+  .s2 .m-body { padding: 12px 14px; }
+  .s2 .m-card { background: #25262b; border: 1px solid #2c2d32; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+  .s2 .m-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; color: #9ca3af; }
+  .s2 .m-val { color: #c9cdd3; font-weight: 600; }
+  .s2 .m-timer { font-family: 'SF Mono', monospace; font-size: 14px; color: #10b981; font-weight: 600; }
+  .s2 .m-btn { width: 100%; padding: 10px; border: 1px solid #ef4444; background: transparent; border-radius: 8px; color: #ef4444; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .s2 .m-stats { display: flex; gap: 4px; margin-top: 8px; }
+  .s2 .m-stat { flex: 1; text-align: center; background: #1a1b1e; border-radius: 6px; padding: 8px 2px; }
+  .s2 .m-stat-num { font-size: 18px; font-weight: 700; color: #6366f1; }
+  .s2 .m-stat-lbl { font-size: 9px; color: #72757e; margin-top: 2px; }
+  .s2 .desc { max-width: 400px; }
+  .s2 .desc h2 { font-size: 36px; color: #fff; font-weight: 700; margin-bottom: 16px; line-height: 1.2; }
+  .s2 .desc p { font-size: 18px; color: #9ca3af; line-height: 1.6; }
+
+  /* Slide 3: Dashboard */
+  .s3 { background: linear-gradient(135deg, #0f172a 0%, #1a1b2e 100%); align-items: center; justify-content: center; flex-direction: column; }
+  .s3 .dash { width: 900px; background: #f5f5f7; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  .s3 .d-tabs { display: flex; background: #fff; border-bottom: 2px solid #e5e5e5; }
+  .s3 .d-tab { padding: 14px 28px; font-size: 14px; color: #6b7280; font-weight: 500; }
+  .s3 .d-tab.active { color: #6366f1; border-bottom: 2px solid #6366f1; margin-bottom: -2px; font-weight: 600; }
+  .s3 .d-body { padding: 24px; display: flex; gap: 20px; }
+  .s3 .d-card { background: #fff; border-radius: 10px; padding: 20px; flex: 1; }
+  .s3 .d-card h3 { font-size: 13px; color: #6b7280; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .s3 .d-big { font-size: 36px; font-weight: 700; color: #6366f1; }
+  .s3 .d-chart { height: 80px; display: flex; align-items: flex-end; gap: 6px; margin-top: 12px; }
+  .s3 .d-bar { width: 100%; border-radius: 4px 4px 0 0; background: #6366f1; }
+  .s3 .d-label { font-size: 12px; color: #37383d; margin-top: 8px; text-align: center; }
+  .s3 .d-title { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 20px; }
+
+  /* Slide 4: AI */
+  .s4 { background: linear-gradient(135deg, #1a1b2e 0%, #0f2b1a 50%, #1a1b2e 100%); align-items: center; justify-content: center; flex-direction: column; gap: 40px; }
+  .s4 h2 { font-size: 40px; color: #fff; font-weight: 700; text-align: center; }
+  .s4 h2 span { color: #10b981; }
+  .s4 .ai-demo { display: flex; gap: 40px; align-items: center; }
+  .s4 .ai-post { width: 380px; background: #25262b; border-radius: 12px; padding: 20px; border: 1px solid #2c2d32; }
+  .s4 .ai-post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .s4 .ai-avatar { width: 36px; height: 36px; border-radius: 50%; background: #6366f1; }
+  .s4 .ai-name { font-size: 14px; color: #fff; font-weight: 600; }
+  .s4 .ai-time { font-size: 11px; color: #72757e; }
+  .s4 .ai-text { font-size: 14px; color: #c9cdd3; line-height: 1.5; }
+  .s4 .ai-arrow { font-size: 48px; color: #10b981; }
+  .s4 .ai-result { width: 340px; background: #0f2b1a; border: 1px solid #10b981; border-radius: 12px; padding: 20px; }
+  .s4 .ai-label { font-size: 12px; color: #10b981; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .s4 .ai-comment { font-size: 16px; color: #fff; line-height: 1.5; }
+
+  /* Slide 5: Privacy */
+  .s5 { background: linear-gradient(135deg, #1a1b2e 0%, #1b2a3a 100%); align-items: center; justify-content: center; flex-direction: column; gap: 40px; }
+  .s5 h2 { font-size: 40px; color: #fff; font-weight: 700; }
+  .s5 .priv-grid { display: flex; gap: 24px; }
+  .s5 .priv-card { width: 240px; padding: 28px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; text-align: center; }
+  .s5 .priv-icon { font-size: 40px; margin-bottom: 12px; }
+  .s5 .priv-title { font-size: 16px; color: #fff; font-weight: 600; margin-bottom: 8px; }
+  .s5 .priv-desc { font-size: 13px; color: #9ca3af; line-height: 1.5; }
+
+  .nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+  .nav button { padding: 8px 20px; border: 1px solid #6366f1; background: #1a1b2e; color: #6366f1; border-radius: 8px; cursor: pointer; font-size: 14px; }
+  .nav button:hover { background: #6366f1; color: #fff; }
+  .nav .info { color: #9ca3af; font-size: 13px; padding: 8px 12px; }
+</style>
+</head>
+<body>
+
+<!-- Slide 1: Hero -->
+<div class="slide s1 active" id="s1">
+  <div class="logo">Auto<span>FB</span></div>
+  <div class="tagline">Smart Facebook Engagement Assistant</div>
+  <div class="features">
+    <div class="feat"><div class="feat-icon">📊</div><div class="feat-text">Dashboard</div></div>
+    <div class="feat"><div class="feat-icon">🤖</div><div class="feat-text">AI Comments</div></div>
+    <div class="feat"><div class="feat-icon">⚡</div><div class="feat-text">Scenarios</div></div>
+    <div class="feat"><div class="feat-icon">🔒</div><div class="feat-text">Privacy First</div></div>
+  </div>
+</div>
+
+<!-- Slide 2: Popup -->
+<div class="slide s2" id="s2">
+  <div class="mockup">
+    <div class="m-header">
+      <span class="m-logo">AutoFB</span>
+      <div class="m-status"><span class="m-dot"></span> Running</div>
+    </div>
+    <div class="m-body">
+      <div class="m-card">
+        <div class="m-row"><span>Scenario</span><span class="m-val">Seeding Pro</span></div>
+        <div class="m-row"><span>Auto-stop</span><span class="m-val">30 min</span></div>
+        <div class="m-row"><span>Elapsed</span><span class="m-timer">12:45</span></div>
+        <div class="m-btn">Stop</div>
+      </div>
+      <div class="m-card">
+        <div style="font-size:12px;color:#9ca3af;margin-bottom:6px">Current Session</div>
+        <div class="m-stats">
+          <div class="m-stat"><div class="m-stat-num">24</div><div class="m-stat-lbl">Like</div></div>
+          <div class="m-stat"><div class="m-stat-num">8</div><div class="m-stat-lbl">Comment</div></div>
+          <div class="m-stat"><div class="m-stat-num">3</div><div class="m-stat-lbl">Friends</div></div>
+          <div class="m-stat"><div class="m-stat-num">5</div><div class="m-stat-lbl">Story</div></div>
+          <div class="m-stat"><div class="m-stat-num">2</div><div class="m-stat-lbl">Groups</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="desc">
+    <h2>Quick Control<br>From Popup</h2>
+    <p>Select a scenario, set a timer, and start with one click. Monitor real-time stats without leaving Facebook.</p>
+  </div>
+</div>
+
+<!-- Slide 3: Dashboard -->
+<div class="slide s3" id="s3">
+  <div class="d-title">📊 Full Analytics Dashboard</div>
+  <div class="dash">
+    <div class="d-tabs">
+      <div class="d-tab active">Overview</div>
+      <div class="d-tab">Scenarios</div>
+      <div class="d-tab">AI Comment</div>
+      <div class="d-tab">Settings</div>
+      <div class="d-tab">Logs</div>
+    </div>
+    <div class="d-body">
+      <div class="d-card">
+        <h3>Total Engagement</h3>
+        <div class="d-big">347</div>
+        <div class="d-chart">
+          <div class="d-bar" style="height:45%"></div>
+          <div class="d-bar" style="height:60%"></div>
+          <div class="d-bar" style="height:35%"></div>
+          <div class="d-bar" style="height:80%"></div>
+          <div class="d-bar" style="height:70%"></div>
+          <div class="d-bar" style="height:55%"></div>
+          <div class="d-bar" style="height:90%"></div>
+        </div>
+        <div class="d-label">Last 7 sessions</div>
+      </div>
+      <div class="d-card">
+        <h3>This Session</h3>
+        <div style="display:flex;gap:16px;margin-top:8px">
+          <div><div style="font-size:28px;font-weight:700;color:#6366f1">42</div><div style="font-size:11px;color:#6b7280">Likes</div></div>
+          <div><div style="font-size:28px;font-weight:700;color:#10b981">15</div><div style="font-size:11px;color:#6b7280">Comments</div></div>
+          <div><div style="font-size:28px;font-weight:700;color:#f59e0b">6</div><div style="font-size:11px;color:#6b7280">Friends</div></div>
+        </div>
+      </div>
+      <div class="d-card">
+        <h3>Sessions</h3>
+        <div style="font-size:13px;color:#37383d;line-height:2">
+          <div>Today 09:15 — 42 likes · 15 cmt</div>
+          <div>Yesterday 14:30 — 38 likes · 12 cmt</div>
+          <div>Mar 24 08:00 — 55 likes · 20 cmt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4: AI -->
+<div class="slide s4" id="s4">
+  <h2>🤖 <span>AI-Powered</span> Smart Comments</h2>
+  <div class="ai-demo">
+    <div class="ai-post">
+      <div class="ai-post-header">
+        <div class="ai-avatar"></div>
+        <div><div class="ai-name">John Doe</div><div class="ai-time">2 hours ago</div></div>
+      </div>
+      <div class="ai-text">Just finished my first marathon! 42km in 4 hours. The training was brutal but crossing that finish line made it all worth it 🏃‍♂️</div>
+    </div>
+    <div class="ai-arrow">→</div>
+    <div class="ai-result">
+      <div class="ai-label">✨ AI Generated Comment</div>
+      <div class="ai-comment">Wow, 4 hours for your first marathon is amazing! All that hard work really paid off 💪</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5: Privacy -->
+<div class="slide s5" id="s5">
+  <h2>🔒 Your Privacy, Our Priority</h2>
+  <div class="priv-grid">
+    <div class="priv-card">
+      <div class="priv-icon">💾</div>
+      <div class="priv-title">100% Local</div>
+      <div class="priv-desc">All data stored in your browser. Nothing sent to external servers.</div>
+    </div>
+    <div class="priv-card">
+      <div class="priv-icon">🔑</div>
+      <div class="priv-title">Your Keys</div>
+      <div class="priv-desc">AI features use YOUR API key directly. We never see it.</div>
+    </div>
+    <div class="priv-card">
+      <div class="priv-icon">📋</div>
+      <div class="priv-title">Minimal Access</div>
+      <div class="priv-desc">Only facebook.com permissions. No broad access needed.</div>
+    </div>
+    <div class="priv-card">
+      <div class="priv-icon">🛡️</div>
+      <div class="priv-title">Manifest V3</div>
+      <div class="priv-desc">Built on Chrome's latest security standard. No eval(), no remote code.</div>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button onclick="show(1)">1</button>
+  <button onclick="show(2)">2</button>
+  <button onclick="show(3)">3</button>
+  <button onclick="show(4)">4</button>
+  <button onclick="show(5)">5</button>
+  <span class="info">Mở file này trong Chrome → Chụp màn hình từng slide (1280x800)</span>
+</div>
+
+<script>
+function show(n) {
+  document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+}
+</script>
+</body>
+</html>

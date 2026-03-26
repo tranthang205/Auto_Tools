@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>AutoFB - Bảng điều khiển</title>
+  <style>
+    :root {
+      --bg: #1a1b1e; --bg2: #25262b; --bg3: #2c2d32; --border: #2c2d32;
+      --text: #c9cdd3; --text2: #9ca3af; --text3: #72757e;
+      --accent: #6366f1; --accent2: #4f46e5;
+      --green: #10b981; --red: #ef4444; --orange: #f59e0b; --blue: #3b82f6;
+      --card-shadow: 0 1px 3px rgba(0,0,0,.3);
+    }
+    body.light {
+      --bg: #f5f5f7; --bg2: #fff; --bg3: #e5e5e5; --border: #e5e5e5;
+      --text: #37383d; --text2: #6b7280; --text3: #9ca3af;
+      --card-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 13px; min-height: 100vh; }
+
+    /* Layout */
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; background: var(--bg2); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .logo { font-size: 20px; font-weight: 700; color: var(--accent); }
+    .topbar-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+    .dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .theme-btn { background: none; border: none; cursor: pointer; color: var(--text3); }
+    .theme-btn svg { width: 18px; height: 18px; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+
+    .tabs { display: flex; gap: 2px; margin-bottom: 20px; background: var(--bg2); border-radius: 8px; padding: 4px; border: 1px solid var(--border); }
+    .tab { flex: 1; padding: 8px 12px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--text3); transition: .15s; }
+    .tab:hover { color: var(--text); }
+    .tab.active { background: var(--accent); color: #fff; font-weight: 600; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; box-shadow: var(--card-shadow); }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+    .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .row:last-child { margin-bottom: 0; }
+    .label { font-size: 12px; color: var(--text2); }
+    .label small { display: block; font-size: 10px; color: var(--text3); margin-top: 1px; }
+
+    input[type="number"], input[type="text"] {
+      padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--bg); color: var(--text); font-size: 12px; outline: none; width: 70px; text-align: center;
+    }
+    input[type="text"] { width: 200px; text-align: left; }
+    input:focus { border-color: var(--accent); }
+    select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 12px; outline: none; cursor: pointer; }
+
+    textarea {
+      width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--bg); color: var(--text); font-size: 11px; resize: vertical;
+      min-height: 60px; max-height: 120px; outline: none; font-family: inherit; margin-top: 6px;
+    }
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--text3); }
+
+    .toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #444; border-radius: 20px; transition: .2s; }
+    .toggle-slider::before { content: ''; position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background: #888; border-radius: 50%; transition: .2s; }
+    .toggle input:checked + .toggle-slider { background: var(--accent); }
+    .toggle input:checked + .toggle-slider::before { background: #fff; transform: translateX(16px); }
+
+    .btn { padding: 8px 16px; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: .15s; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { opacity: .9; }
+    .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); }
+    .btn-danger:hover { background: rgba(239,68,68,.1); }
+    .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-sm { padding: 4px 10px; font-size: 11px; }
+
+    /* Grid */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+    /* Stats */
+    .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+    .stat-num { font-size: 28px; font-weight: 700; color: var(--accent); }
+    .stat-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+    /* Line Chart (YouTube Studio style) */
+    .chart-wrap { position: relative; height: 200px; padding: 10px 0 24px 40px; }
+    .chart-canvas { width: 100%; height: 100%; }
+    .chart-legend { display: flex; gap: 16px; margin-top: 8px; justify-content: center; }
+    .chart-legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text2); }
+    .chart-legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* Scenario list */
+    .scenario-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; cursor: pointer; transition: .15s; }
+    .scenario-item:hover { border-color: var(--accent); }
+    .scenario-item.selected { border-color: var(--accent); background: rgba(99,102,241,.08); }
+    .scenario-info { flex: 1; }
+    .scenario-name { font-size: 13px; font-weight: 600; }
+    .scenario-desc { font-size: 10px; color: var(--text3); margin-top: 2px; }
+    .scenario-actions { display: flex; gap: 4px; }
+
+    /* Workflow */
+    .wf-step-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
+    .wf-step-header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg2); border-bottom: 1px solid var(--border); }
+    .wf-step-num { font-size: 10px; color: var(--accent); font-weight: 600; background: rgba(99,102,241,.1); padding: 2px 8px; border-radius: 10px; }
+    .wf-step-type { font-weight: 600; font-size: 12px; flex: 1; }
+    .wf-step-actions { display: flex; gap: 3px; }
+    .wf-step-fields { padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .wf-field { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+    .wf-field.full { width: 100%; }
+    .wf-field span { white-space: nowrap; }
+    .wf-field input[type="number"] { width: 55px; }
+    .wf-field textarea { width: 100%; min-height: 40px; max-height: 80px; font-size: 11px; }
+    .wf-arrow { text-align: center; color: var(--text3); font-size: 14px; margin: 2px 0; }
+
+    /* Log */
+    .log-area { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 400px; overflow-y: auto; font-family: 'SF Mono','Consolas',monospace; font-size: 11px; line-height: 1.6; }
+    .log-area::-webkit-scrollbar { width: 4px; }
+    .log-area::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 4px; }
+    .log-entry.success { color: var(--green); }
+    .log-entry.warn { color: var(--orange); }
+    .log-entry.info { color: var(--text3); }
+
+    .log-toolbar { display: flex; gap: 6px; margin-bottom: 8px; }
+    .log-toolbar input { flex: 1; }
+
+    /* Session history */
+    .session-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid var(--border); font-size: 11px; }
+    .session-item:last-child { border: none; }
+    .session-date { color: var(--text3); min-width: 120px; }
+    .session-stats { flex: 1; color: var(--text2); }
+    .session-duration { color: var(--accent); font-weight: 500; min-width: 50px; text-align: right; }
+
+    .sub-section { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .sub-section.visible { display: block; }
+
+    .footer { text-align: center; padding: 20px; font-size: 11px; color: var(--text3); }
+    .footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="logo">AutoFB</span>
+      <div class="topbar-status">
+        <span class="dot" id="dot"></span>
+        <span id="statusText">Sẵn sàng</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span id="runTimer" style="font-family:monospace;font-size:14px;color:var(--green);display:none">00:00</span>
+      <button class="theme-btn" id="themeToggle">
+        <svg class="icon-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.3 3.3l1.4 1.4M11.3 11.3l1.4 1.4M3.3 12.7l1.4-1.4M11.3 4.7l1.4-1.4"/></svg>
+        <svg class="icon-moon" style="display:none" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 8.5a5.5 5.5 0 0 1-6-6 5.5 5.5 0 1 0 6 6z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" data-tab="dashboard">Tổng quan</div>
+      <div class="tab" data-tab="scenarios">Kịch bản</div>
+      <div class="tab" data-tab="ai">AI Comment</div>
+      <div class="tab" data-tab="settings">Cài đặt</div>
+      <div class="tab" data-tab="logs">Nhật ký</div>
+    </div>
+
+    <!-- TAB: DASHBOARD -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="grid-3" style="margin-bottom:14px">
+        <div class="stat-card"><div class="stat-num" id="dLike">0</div><div class="stat-lbl">Tổng Like</div></div>
+        <div class="stat-card"><div class="stat-num" id="dCmt">0</div><div class="stat-lbl">Tổng Comment</div></div>
+        <div class="stat-card"><div class="stat-num" id="dFriend">0</div><div class="stat-lbl">Lời mời kết bạn</div></div>
+      </div>
+      <div class="grid-3" style="margin-bottom:14px">
+        <div class="stat-card"><div class="stat-num" id="dStory">0</div><div class="stat-lbl">Story đã xem</div></div>
+        <div class="stat-card"><div class="stat-num" id="dGroup">0</div><div class="stat-lbl">Nhóm đã tham gia</div></div>
+        <div class="stat-card"><div class="stat-num" id="dSessions">0</div><div class="stat-lbl">Số phiên chạy</div></div>
+      </div>
+
+      <!-- Line Chart -->
+      <div class="card">
+        <div class="card-title">Hoạt động theo phiên</div>
+        <div class="chart-wrap">
+          <canvas id="chartCanvas" class="chart-canvas"></canvas>
+        </div>
+        <div class="chart-legend">
+          <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#6366f1"></div>Like</div>
+          <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#10b981"></div>Comment</div>
+          <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#f59e0b"></div>Kết bạn</div>
+          <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#3b82f6"></div>Story</div>
+          <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#a78bfa"></div>Nhóm</div>
+        </div>
+      </div>
+
+      <!-- Recent sessions -->
+      <div class="card">
+        <div class="card-title">Lịch sử phiên chạy</div>
+        <div id="sessionList" style="max-height:250px;overflow-y:auto">
+          <div style="color:var(--text3);text-align:center;padding:20px">Chưa có dữ liệu</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: SCENARIOS -->
+    <div class="tab-content" id="tab-scenarios">
+      <div class="grid-2">
+        <!-- Left: list -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-weight:600">Danh sách kịch bản</span>
+            <button class="btn btn-primary btn-sm" id="btnNewScenario">+ Tạo mới</button>
+          </div>
+          <div id="scenarioList"></div>
+        </div>
+        <!-- Right: editor -->
+        <div>
+          <div class="card" id="scenarioEditor" style="display:none">
+            <div class="card-title">Chỉnh sửa kịch bản</div>
+            <div class="row">
+              <span class="label">Tên</span>
+              <input type="text" id="scName" style="width:180px">
+            </div>
+
+            <div class="card-title" style="margin-top:14px">Like</div>
+            <div class="row"><span class="label">Giới hạn</span><input type="number" id="scMaxLikes" min="0" max="500"></div>
+            <div class="row"><span class="label">Delay (giây)</span><input type="number" id="scDelay" min="2" max="30"></div>
+            <div class="row">
+              <span class="label">Tự cuộn trang</span>
+              <label class="toggle"><input type="checkbox" id="scAutoScroll"><span class="toggle-slider"></span></label>
+            </div>
+
+            <div class="card-title" style="margin-top:14px">Comment</div>
+            <div class="row">
+              <span class="label">Bật comment</span>
+              <label class="toggle"><input type="checkbox" id="scEnableComment"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="sub-section" id="scCommentSection">
+              <div class="row"><span class="label">Tỷ lệ (%)</span><input type="number" id="scCommentFreq" min="10" max="100" step="10"></div>
+              <div class="row"><span class="label">Số cmt/bài</span><input type="number" id="scCommentsPerPost" min="1" max="5"></div>
+              <div class="row">
+                <span class="label">Tự like bình luận<small>Like comment của mình sau khi đăng</small></span>
+                <label class="toggle"><input type="checkbox" id="scSelfLikeComment" checked><span class="toggle-slider"></span></label>
+              </div>
+              <textarea id="scCommentList" placeholder="Mỗi dòng 1 comment..."></textarea>
+            </div>
+
+            <div class="card-title" style="margin-top:14px">Story</div>
+            <div class="row">
+              <span class="label">Bật xem story<small>Tự xen kẽ khi like</small></span>
+              <label class="toggle"><input type="checkbox" id="scEnableStory"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="sub-section" id="scStorySection">
+              <div class="row"><span class="label">Số story tối đa</span><input type="number" id="scMaxStories" min="1" max="20"></div>
+              <div class="row"><span class="label">Thả tim (%)</span><input type="number" id="scStoryLikeFreq" min="0" max="100" step="10"></div>
+            </div>
+
+            <div class="card-title" style="margin-top:14px">Kết bạn</div>
+            <div class="row">
+              <span class="label">Bật kết bạn<small>Tự xen kẽ: gợi ý + tìm kiếm</small></span>
+              <label class="toggle"><input type="checkbox" id="scEnableAddFriend"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="sub-section" id="scFriendSection">
+              <div class="row"><span class="label">Giới hạn lời mời</span><input type="number" id="scMaxFriends" min="1" max="50"></div>
+              <textarea id="scFriendKeywords" placeholder="Từ khóa tìm người kết bạn (mỗi dòng 1). VD:&#10;cầu lông hà nội&#10;lập trình viên&#10;(Bỏ trống = chỉ dùng gợi ý)"></textarea>
+            </div>
+
+            <div class="card-title" style="margin-top:14px">Tham gia nhóm</div>
+            <div class="row">
+              <span class="label">Bật tham gia nhóm<small>Tự xen kẽ khi like</small></span>
+              <label class="toggle"><input type="checkbox" id="scEnableJoinGroup"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="sub-section" id="scGroupSection">
+              <div class="row"><span class="label">Số nhóm tối đa</span><input type="number" id="scMaxGroups" min="1" max="30"></div>
+              <textarea id="scGroupKeywords" placeholder="Mỗi dòng 1 từ khóa tìm nhóm..."></textarea>
+            </div>
+
+            <div class="card-title" style="margin-top:14px">Page Facebook</div>
+            <div class="row">
+              <span class="label">Bật quản lý Page<small>Tạo page, mời like, đăng bài</small></span>
+              <label class="toggle"><input type="checkbox" id="scEnablePage"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="sub-section" id="scPageSection">
+              <div class="row">
+                <span class="label">Hành động</span>
+                <select id="scPageAction">
+                  <option value="create">Tạo Page mới</option>
+                  <option value="invite">Mời bạn bè like Page</option>
+                  <option value="post">Đăng bài lên Page</option>
+                </select>
+              </div>
+              <div id="scPageCreateFields">
+                <div class="row"><span class="label">Tên Page</span><input type="text" id="scPageName" style="width:180px" placeholder="Shop ABC"></div>
+                <div class="row"><span class="label">Danh mục</span>
+                  <select id="scPageCategory">
+                    <option value="">Chọn</option>
+                    <option value="Local business">Doanh nghiệp</option>
+                    <option value="Brand">Thương hiệu</option>
+                    <option value="Community">Cộng đồng</option>
+                    <option value="Entertainment">Giải trí</option>
+                    <option value="Shopping">Mua sắm</option>
+                    <option value="Education">Giáo dục</option>
+                  </select>
+                </div>
+                <textarea id="scPageBio" placeholder="Mô tả ngắn về Page..."></textarea>
+              </div>
+              <div id="scPageInviteFields" style="display:none">
+                <div class="row"><span class="label">URL Page</span><input type="text" id="scPageUrl" style="width:180px" placeholder="facebook.com/yourpage"></div>
+                <div class="row"><span class="label">Số lời mời</span><input type="number" id="scPageInviteMax" value="20" min="1" max="100"></div>
+              </div>
+              <div id="scPagePostFields" style="display:none">
+                <div class="row"><span class="label">URL Page</span><input type="text" id="scPagePostUrl" style="width:180px" placeholder="facebook.com/yourpage"></div>
+                <textarea id="scPagePostContent" placeholder="Nội dung bài đăng (hoặc bật AI viết)"></textarea>
+                <div class="row">
+                  <span class="label">AI viết bài<small>Gemini tạo nội dung</small></span>
+                  <label class="toggle"><input type="checkbox" id="scPageUseAI"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="sub-section" id="scPageAISection">
+                  <div class="row"><span class="label">Chủ đề</span><input type="text" id="scPageAITopic" style="width:180px" placeholder="Khuyến mãi cuối tuần"></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:6px;margin-top:14px">
+              <button class="btn btn-primary" id="btnSaveScenario">Lưu</button>
+              <button class="btn btn-ghost" id="btnCancelScenario">Hủy</button>
+            </div>
+          </div>
+          <div id="scenarioPlaceholder" class="card" style="text-align:center;color:var(--text3);padding:40px">
+            Chọn kịch bản để chỉnh sửa<br>hoặc tạo mới
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Page FB removed - now part of scenario editor -->
+
+    <!-- TAB: AI COMMENT -->
+    <div class="tab-content" id="tab-ai">
+      <div class="card">
+        <div class="card-title">AI Comment (Gemini)</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">
+          Khi bật, AutoFB sẽ đọc nội dung bài viết và dùng Gemini AI để tạo comment phù hợp thay vì dùng danh sách có sẵn.
+        </p>
+        <div class="row">
+          <span class="label">Bật AI Comment</span>
+          <label class="toggle"><input type="checkbox" id="aiEnabled"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="sub-section" id="aiSection">
+          <div class="row" style="margin-bottom:10px">
+            <span class="label">Gemini API Key<small>Lấy từ aistudio.google.com</small></span>
+            <input type="text" id="aiApiKey" style="width:280px" placeholder="AIzaSy...">
+          </div>
+          <div class="row" style="margin-bottom:10px">
+            <span class="label">Phong cách<small>Giọng điệu comment</small></span>
+            <select id="aiTone">
+              <option value="friendly">Thân thiện</option>
+              <option value="professional">Chuyên nghiệp</option>
+              <option value="casual">Thoải mái</option>
+              <option value="enthusiastic">Nhiệt tình</option>
+            </select>
+            <!-- Tone values must match TONE_MAP in background.js -->
+          </div>
+          <div class="row" style="margin-bottom:10px">
+            <span class="label">Ngôn ngữ</span>
+            <select id="aiLang">
+              <option value="vi">Tiếng Việt</option>
+              <option value="en">English</option>
+              <option value="auto">Tự phát hiện</option>
+            </select>
+          </div>
+          <div class="row">
+            <span class="label">Độ dài tối đa<small>Số ký tự</small></span>
+            <input type="number" id="aiMaxLen" value="100" min="20" max="500">
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn btn-ghost btn-sm" id="btnTestAI">Kiểm tra kết nối</button>
+            <span id="aiTestResult" style="margin-left:8px;font-size:11px"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: SETTINGS -->
+    <div class="tab-content" id="tab-settings">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Hành vi chung</div>
+          <div class="row">
+            <span class="label">Tạm dừng khi phát hiện CAPTCHA<small>Dừng ngay nếu gặp xác minh</small></span>
+            <label class="toggle"><input type="checkbox" id="gPauseCaptcha" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="row">
+            <span class="label">Tự cuộn trang mặc định</span>
+            <label class="toggle"><input type="checkbox" id="gAutoScroll" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="row">
+            <span class="label">Độ trễ ngẫu nhiên mặc định (%)<small>% biến thiên quanh delay cài đặt</small></span>
+            <input type="number" id="gRandomPct" value="30" min="0" max="100">
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Dữ liệu</div>
+          <div class="row">
+            <span class="label">Xóa lịch sử phiên chạy</span>
+            <button class="btn btn-danger btn-sm" id="btnClearHistory">Xóa tất cả</button>
+          </div>
+          <div class="row">
+            <span class="label">Xóa nhật ký hoạt động</span>
+            <button class="btn btn-danger btn-sm" id="btnClearAllLogs">Xóa tất cả</button>
+          </div>
+          <div class="row">
+            <span class="label">Xuất cấu hình (backup)</span>
+            <button class="btn btn-ghost btn-sm" id="btnExportConfig">Xuất JSON</button>
+          </div>
+          <div class="row">
+            <span class="label">Nhập cấu hình</span>
+            <button class="btn btn-ghost btn-sm" id="btnImportConfig">Nhập JSON</button>
+            <input type="file" id="importFile" accept=".json" style="display:none">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: LOGS -->
+    <div class="tab-content" id="tab-logs">
+      <div class="card">
+        <div class="card-title">Nhật ký hoạt động</div>
+        <div class="log-toolbar">
+          <input type="text" id="logSearch" placeholder="Tìm kiếm..." style="width:100%;text-align:left">
+          <select id="logFilter">
+            <option value="all">Tất cả</option>
+            <option value="success">Thành công</option>
+            <option value="warn">Cảnh báo</option>
+            <option value="info">Thông tin</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" id="btnExportLog">Xuất</button>
+          <button class="btn btn-danger btn-sm" id="btnClearLog">Xóa</button>
+        </div>
+        <div class="log-area" id="logArea">
+          <div class="log-entry info">Chưa có nhật ký</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><a href="https://trancongthang.vn" target="_blank">trancongthang.vn</a></div>
+  <script src="options.js"></script>
+</body>
+</html>
